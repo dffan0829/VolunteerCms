@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dffan.volunter.dao.InformMapper">
+   <!-- 引用其他工作空间的cache 即整合第三方框架 ecache  -->
+   <cache-ref namespace="com.dffan.volunter.dao.ProjectMapper"/>
+	<!-- 查询所有的通知公告 -->
+	<select id="getAllInform" resultType="inform">
+		select * from volun_inform
+		<if test="current == 'index'">
+			limit 0,8
+		</if>
+		<!-- 如果有搜索的关键词时 -->
+		<if test="keyword!=null">
+			<where>
+				inform_title like '%${keyword}%'
+			</where>
+		</if>
+	</select>
+	<!-- 根据id通知公告详情 -->
+	<select id="queryInformDetail" resultType="inform">
+		select * from volun_inform where id = #{id}
+	</select>
+</mapper>

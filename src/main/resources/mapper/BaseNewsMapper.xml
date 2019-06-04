@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dffan.volunter.dao.BaseNewsMapper">
+   <!-- 引用其他工作空间的cache 即整合第三方框架 ecache  -->
+   <cache-ref namespace="com.dffan.volunter.dao.ProjectMapper"/>
+<!-- 查询所有基层速递 -->
+ <select id="getAllBaseNews" resultType="baseNews">
+   select * from volun_basenews
+   <if test="current == 'index'">
+    order by base_time desc limit 0,8
+   </if>
+     <!--  如果有搜索的关键词时 -->   
+   <if test="keyword!=null">
+	   <where>
+	      base_title like '%${keyword}%' 
+	   </where>
+   </if>
+ </select>
+ <!-- 根据id查询基层速递详情 -->
+ <select id="queryBaseDetail" resultType="baseNews" >
+   select * from volun_basenews where id = #{id}
+ </select>
+</mapper>

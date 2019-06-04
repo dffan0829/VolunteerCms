@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dffan.volunter.dao.DataMapper">
+   <!-- 引用其他工作空间的cache 即整合第三方框架 ecache  -->
+   <cache-ref namespace="com.dffan.volunter.dao.ProjectMapper"/>
+	<!-- 查询所有资料 -->
+	<sql id="orderDesc">
+		order by data_time desc
+	</sql>
+	<!-- 如果有搜索的关键词时 -->
+	<sql id="likesql">
+		and data_title like '%${keyword}%'
+	</sql>
+	<select id="getAllOnline" resultType="volunData">
+		select * from volun_data where data_type = 1
+		<!-- 含有关键词的查询 -->
+		<if test="keyword!=null">
+			<include refid="likesql"></include>
+		</if>
+		<include refid="orderDesc"></include>
+		<if test="current == 'index'">
+			limit 0,8
+		</if>
+	</select>
+	<select id="getAllFile" resultType="volunData">
+		select * from volun_data where data_type = 2
+		<!-- 含有关键词的查询 -->
+		<if test="keyword!=null">
+			<include refid="likesql"></include>
+		</if>
+		<include refid="orderDesc"></include>
+		<if test="current == 'index'">
+			limit 0,8
+		</if>
+	</select>
+	<select id="getAllMedia" resultType="volunData">
+		select * from volun_data where data_type = 3
+		<!-- 含有关键词的查询 -->
+		<if test="keyword!=null">
+			<include refid="likesql"></include>
+		</if>
+		<include refid="orderDesc"></include>
+		<if test="current == 'index'">
+			limit 0,8
+		</if>
+	</select>
+	<!-- 查询资料详情 -->
+	<select id="queryDataDetail" resultType="volunData">
+		select * from volun_data where id = #{id} and data_type = #{type}
+	</select>
+	<!-- 删除内容 -->
+	<delete id="deleteRow">
+		delete from ${table} where id = #{id}
+	</delete>
+
+	<!-- 查询文件资料 -->
+	<select id="queryData" resultType="volunData">
+		select * from volun_data where 1=1
+		<if test="type!=null">
+			and data_type = #{type}
+		</if>
+		<if test="sort!=null and order!=null">
+			order by ${sort} ${order}
+		</if>
+	</select>
+	<!-- 插入一条资料 -->
+	<insert id="saveVolunData">
+		insert into volun_data values
+		(null,#{dataTitle},#{dataContent},#{dataTime},#{dataType})
+	</insert>
+	<update id="updateVolunData">
+		update volun_data set data_title = #{dataTitle} , data_content =
+		#{dataContent} where id = #{id}
+	</update>
+</mapper>

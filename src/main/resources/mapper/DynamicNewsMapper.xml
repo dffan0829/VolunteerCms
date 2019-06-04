@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dffan.volunter.dao.DynamicNewsMapper">
+   <!-- 引用其他工作空间的cache 即整合第三方框架 ecache  -->
+   <cache-ref namespace="com.dffan.volunter.dao.ProjectMapper"/>
+	<!-- 查询所有动态要闻 -->
+	<select id="getAllDynamicNews" resultType="dynamicNews">
+		select * from volun_dynamicnews
+		<!-- 后台查询动态要闻 设置的排序 -->
+		<if test="sort!=null and order!=null">
+			order by ${sort} ${order}
+		</if>
+		<if test="current == 'index'">
+			order by dynamic_time desc limit 0,8
+		</if>
+		<!-- 如果有搜索的关键词时 -->
+		<if test="keyword!=null">
+			<where>
+				dynamic_title like '%${keyword}%'
+			</where>
+		</if>
+		<!-- 分页查询 -->
+		<!-- <if test="idx !=null and pageSize !=null"> limit #{idx},#{pageSize} 
+			</if> -->
+	</select>
+	<!-- 根据id动态要闻详情 -->
+	<select id="queryDynamicDetail" resultType="dynamicNews">
+		select * from volun_dynamicnews where id = #{id}
+	</select>
+	<!-- 保存一条动态要闻 -->
+	<insert id="saveAdd">
+		insert into volun_dynamicnews values
+		(null,#{dynamicTitle},#{dynamicContent},#{dynamicTime},null)
+	</insert>
+	<!-- 修改动态要闻 -->
+	<update id="update">
+		update volun_dynamicnews set
+		dynamic_title = #{dynamicTitle}
+		, dynamic_content = #{dynamicContent}
+		where id = #{id}
+	</update>
+
+</mapper>

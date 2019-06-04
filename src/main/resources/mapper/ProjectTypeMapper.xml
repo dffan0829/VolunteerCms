@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dffan.volunter.dao.ProjectTypeMapper">
+ <!-- 引用其他工作空间的cache 即整合第三方框架 ecache  -->
+   <cache-ref namespace="com.dffan.volunter.dao.ProjectMapper"/>
+	<select id="getAllProtype" resultType="projectType">
+		select * from volun_project_type
+	</select>
+</mapper>

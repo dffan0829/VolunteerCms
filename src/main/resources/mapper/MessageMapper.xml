@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dffan.volunter.dao.MessageMapper">
+   <!-- 引用其他工作空间的cache 即整合第三方框架 ecache  -->
+   <cache-ref namespace="com.dffan.volunter.dao.ProjectMapper"/>
+	<!-- 查询用户留言 -->
+	<select id="getAllMessage" resultType="visitorMsg">
+		select * from volun_message where 1=1
+		<if test="sort!=null and order!=null">
+			order by ${sort} ${order}
+		</if>
+	</select>
+	<!-- 保存一条用户留言 -->
+	<insert id="saveYhly">
+		insert into volun_message values (null,#{ip},#{msgTitle},
+		#{msgContent},#{msgTime},
+		#{msgPhpnumber},#{msgPerson},#{msgStatus})
+	</insert>
+	<!-- 修改留言表 -->
+	<update id="updateMessage">
+		update volun_message
+		<if test="id!=null">
+			<set>
+				msg_status = '1'
+			</set>
+		</if>
+		where id = #{id}
+	</update>
+</mapper>

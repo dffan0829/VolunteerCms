@@ -1,0 +1,10 @@
+mybatis:
+  config-location: classpath:config/mybatis-config.xml
+  mapper-locations: classpath:mapper/*.xml
+spring:
+  datasource:
+    username: root
+    password: 123456
+    url : jdbc:mysql://localhost:3306/volunterr_db?useUnicode=true&amp;characterEncoding=utf8&amp;autoReconnect=true&amp;failOverReadOnly=false
+    driver-class-name : com.mysql.jdbc.Driver
+    type: com.mchange.v2.c3p0.ComboPooledDataSource

@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dffan.volunter.dao.ProjectMapper">
+    <!-- 开启该namespace下的二级缓存 整合第三方框架 ehcache -->
+    <cache type="org.mybatis.caches.ehcache.EhcacheCache"></cache>
+	<select id="getAllProject" resultType="teamProject">
+		SELECT
+		v.id,
+		v.pro_title,
+		v.pro_content,
+		v.pro_status,
+		v.pro_address,
+		v.pro_time,
+		(select t.type_name from volun_project_type t where t.id = v.pro_fkid) as pro_fkid,
+		v.pro_gotime,
+		(select team_name from volun_team t where t.id = v.pro_pubteam) as pro_pubteam,
+		v.pro_totalperson,
+		(select count(*) from volun_addpro a where a.pro_id = v.id) as pro_addcount
+		FROM
+		volun_project v
+		<!-- 当前为队长登陆时 查询该队伍下的所有志愿者活动 -->
+		<if test="team!=null">
+			<where>
+				pro_pubteam = #{team}
+			</where>
+		</if>
+
+		<!-- 管理员查询当前队伍的志愿者活动 -->
+		<if test="teamid!=null">
+			<where>
+				pro_pubteam = #{teamid}
+			</where>
+		</if>
+		<!-- 如果有搜索的关键词时 -->
+		<if test="keyword!=null">
+			<where>
+				pro_title like '%${keyword}%'
+				or pro_address like '%${keyword}%'
+			</where>
+		</if>
+		<!-- 排序 -->
+		<if test="sort!=null and order!=null">
+			order by ${sort} ${order}
+		</if>
+
+		<!-- 未审核的活动 -->
+		<if test="status!=null">
+			where v.pro_status = '0'
+		</if>
+		
+		<!-- 已审核的活动 -->
+		<if test="ysh!=null">
+			where v.pro_status != '0'
+		</if>
+		
+		<if test="current == 'index'">
+			order by pro_time desc limit 0,8
+		</if>
+	</select>
+	<!-- 删除志愿活动 -->
+	<delete id="deletePro">
+		delete from volun_project where id = #{proid}
+	</delete>
+	<!-- 根据id志愿者项目详情 -->
+	<select id="queryProjectDetail" resultType="teamProject">
+		<!-- select * from volun_project where id = #{id} -->
+		SELECT
+		v.id,
+		v.pro_title,
+		v.pro_content,
+		v.pro_status,
+		v.pro_address,
+		(select t.type_name from volun_project_type t where t.id = v.pro_fkid)
+		as pro_fkid,
+		v.pro_gotime,
+		(select team_name from volun_team t where t.id = v.pro_pubteam) as
+		pro_pubteam,
+		v.pro_totalperson
+		FROM
+		volun_project v where v.id = #{id}
+	</select>
+	<!-- 查询所有志愿者项目 -->
+	<select id="queryAllProject" resultType="teamProject">
+		select * from volun_project
+		<where>
+			<!-- 当前为队伍查询本队伍的活动 -->
+			<if test="team!=null">
+				pro_pubteam = #{team} and pro_status!='0'
+			</if>
+		</where>
+	</select>
+	<select id="queryProjectStatus" resultType="java.lang.String">
+		select pro_status from volun_project where id = #{id}
+	</select>
+	<!-- 查询当前活动参加的志愿者 -->
+	<select id="queryAddPersonByPro" resultType="volunteer">
+		select * from volun_register r where r.id in
+		(select a.volunteer_id from volun_addpro a where a.pro_id=#{id})
+	</select>
+	<!-- 志愿者参加志愿者活动 -->
+	<insert id="addProByVolun">
+		insert into volun_addpro values (null,#{proId},#{volunteerId})
+	</insert>
+	<!-- 根据志愿者id查询该志愿者参加的所有志愿活动 -->
+	<select id="queryAddPro" resultType="teamProject">
+		select p.* from volun_addpro a join volun_project p on a.pro_id = p.id where
+		a.volunteer_id = #{id}
+	</select>
+	<!-- 查看志愿者当前是否参加了该活动 -->
+	<select id="queryProByMyId" resultType="java.lang.Integer">
+		select count(*) from volun_addpro a where a.pro_id = #{proid} and
+		a.volunteer_id = #{id}
+	</select>
+	<!-- 各队队长后台 添加活动 -->
+	<insert id="addProjectByAdmin">
+		insert into volun_project values
+		(null,#{proTitle},#{proContent},#{proStatus},#{proAddress}
+		,#{proFkid},#{proGotime},#{proTime}
+		,#{proPubteam},#{proTotalperson})
+	</insert>
+	<!-- 更新 招募活动表 -->
+	<update id="updateProject">
+		update volun_project
+		<set>
+			<if test="proTitle!=null">
+				pro_title = #{proTitle},
+			</if>
+			<if test="proContent!=null">
+				pro_content = #{proContent},
+			</if>
+			<if test="proStatus!=null">
+				pro_status = #{proStatus},
+			</if>
+			<if test="proAddress!=null">
+				pro_address = #{proAddress},
+			</if>
+			<if test="proFkid!=null">
+				pro_fkid = #{proFkid},
+			</if>
+			<if test="proGotime!=null">
+				pro_gotime = #{proGotime},
+			</if>
+			<if test="proTotalperson!=null">
+				pro_totalperson = #{proTotalperson},
+			</if>
+		</set>
+		<where>
+			<if test="id!=null">
+				id = #{id}
+			</if>
+		</where>
+	</update>
+
+	<!-- 更新 招募活动表 通过实体 -->
+	<update id="updateProjectByEntity">
+		update volun_project
+		<set>
+			<if test="proTitle!=null">
+				pro_title = #{proTitle},
+			</if>
+			<if test="proContent!=null">
+				pro_content = #{proContent},
+			</if>
+			<if test="proStatus!=null">
+				pro_status = #{proStatus},
+			</if>
+			<if test="proAddress!=null">
+				pro_address = #{proAddress},
+			</if>
+			<if test="proFkid!=null">
+				pro_fkid = #{proFkid},
+			</if>
+			<if test="proGotime!=null">
+				pro_gotime = #{proGotime},
+			</if>
+			<if test="proTotalperson!=null">
+				pro_totalperson = #{proTotalperson},
+			</if>
+		</set>
+		<where>
+			<if test="id!=null">
+				id = #{id}
+			</if>
+		</where>
+	</update>
+</mapper>

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dffan.volunter.dao.TeamMapper">
+   <!-- 引用其他工作空间的cache 即整合第三方框架 ecache  -->
+   <cache-ref namespace="com.dffan.volunter.dao.ProjectMapper"/>
+	<!-- 查询活跃组织 -->
+	<resultMap type="java.util.HashMap" id="HotTeamMap">
+		<id column="id" property="id" />
+		<result column="team_name" property="teamName" />
+	</resultMap>
+	<select id="getHotteam" resultMap="HotTeamMap">
+		SELECT
+		t.id as id,t.team_name as team_name
+		FROM
+		volun_team t
+		LEFT JOIN volun_project v ON t.id = v.pro_pubteam
+		WHERE
+		v.pro_status != '0'
+		OR v.pro_status IS NULL
+		GROUP BY
+		t.id
+		ORDER BY
+		count(*) DESC
+	</select>
+	<!-- 查询列表 -->
+	<select id="queryAllTeam" resultType="team">
+		select * from volun_team
+		<if test="current == 'index'">
+			limit 0,8
+		</if>
+	</select>
+	<!-- 查询详情 -->
+	<select id="getDetailTeam" resultType="team">
+		select * from volun_team where id = #{id}
+	</select>
+	<!-- 查询组织 （后台） -->
+	<resultMap type="java.util.HashMap" id="queryTeamMap">
+		<result column="id" property="id" />
+		<result column="team_name" property="teamName" />
+	</resultMap>
+	<select id="queryTeam" resultMap="queryTeamMap">
+		select id,team_name from volun_team
+	</select>
+	<!-- 队长更新组织信息 -->
+	<update id="updateTeam">
+		update volun_team
+		<set>
+			<if test="teamName!=null">
+				team_name = #{teamName},
+			</if>
+			<if test="teamShine!=null">
+				team_shine = #{teamShine},
+			</if>
+			<if test="teamBrief!=null">
+				team_brief = #{teamBrief},
+			</if>
+			<if test="teamLogo!=null">
+				team_logo = #{teamLogo},
+			</if>
+		</set>
+		where id = #{id}
+	</update>
+</mapper>
